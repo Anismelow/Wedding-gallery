@@ -1,0 +1,24 @@
+
+# --- Secretos ---
+# Contraseñas y variables de entorno. Solo se sube la plantilla.
+.env
+.env.*
+!.env.example
+
+# --- Fotos subidas en desarrollo ---
+# Sin barra delante: se ignora tanto en la raíz como dentro de backend/.
+# Nunca deben acabar fotos de la boda en un repo público.
+uploads/
+
+# --- IDEs y editores ---
+.vscode/
+.idea/
+*.iml
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+*~
+
+# --- Logs ---
+*.log
