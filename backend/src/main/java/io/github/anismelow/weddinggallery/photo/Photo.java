@@ -1,4 +1,4 @@
-package io.github.anismelow.weddinggallery.photo.model;
+package io.github.anismelow.weddinggallery.photo;
 
 import java.time.Instant;                        
 import java.util.UUID;
