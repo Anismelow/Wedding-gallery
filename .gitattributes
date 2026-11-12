@@ -1,0 +1,15 @@
+# En el repo y en tu disco: siempre LF, en Windows y en Linux
+* text=auto eol=lf
+
+# Los scripts de Windows necesitan CRLF para funcionar
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binarios: Git no debe tocarlos nunca (¡las fotos!)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.heic binary
+*.ico  binary
+*.jar  binary
