@@ -1,10 +1,8 @@
-package io.github.anismelow.weddinggallery.photo.repository;
+package io.github.anismelow.weddinggallery.photo;
 
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import io.github.anismelow.weddinggallery.photo.model.Photo;
 
 
 
