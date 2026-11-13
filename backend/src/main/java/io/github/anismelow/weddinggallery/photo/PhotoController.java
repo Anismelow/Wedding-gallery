@@ -3,7 +3,6 @@ package io.github.anismelow.weddinggallery.photo;
 import java.time.Duration;
 import java.util.UUID;
 
-import javax.print.attribute.standard.Media;
 
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 
 @RestController
 @RequestMapping("/api/photos")
