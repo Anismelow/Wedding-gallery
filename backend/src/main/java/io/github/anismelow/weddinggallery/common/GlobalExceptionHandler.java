@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import io.github.anismelow.weddinggallery.photo.InvalidPhotoException;
+import io.github.anismelow.weddinggallery.photo.PhotoNotFoundException;
 import io.github.anismelow.weddinggallery.storage.StorageException;
 
 @RestControllerAdvice
@@ -33,4 +34,9 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "No se pudo guardar la foto. Inténtalo de nuevo.");
     }
+
+    @ExceptionHandler(PhotoNotFoundException.class)
+public ProblemDetail handlePhotoNotFound(PhotoNotFoundException ex) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+}
 }

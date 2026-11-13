@@ -1,11 +1,20 @@
 package io.github.anismelow.weddinggallery.photo;
 
+import java.time.Duration;
+import java.util.UUID;
+
+import javax.print.attribute.standard.Media;
+
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 
 @RestController
 @RequestMapping("/api/photos")
@@ -39,6 +49,15 @@ public PagedModel<PhotoResponse> list(
     return new PagedModel<>(photoService.list(pageable));
 }
 
+    @GetMapping("/{id}/image")
+public ResponseEntity<Resource> image(@PathVariable  UUID id){
+    PhotoFile file = photoService.getImage(id);
+    return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(file.contentType()))
+            .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
+            .header("X-Content-Type-Options", "nosniff")
+            .body(file.resource());
+}
 
 
 }

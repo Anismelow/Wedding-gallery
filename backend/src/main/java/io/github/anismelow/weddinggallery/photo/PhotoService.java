@@ -3,8 +3,9 @@ package io.github.anismelow.weddinggallery.photo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
-import java.util.Set;
+import java.util.UUID;
 
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,13 @@ public class PhotoService {
 
     public Page<PhotoResponse> list(Pageable pageable) {
         return photoRepository.findAll(pageable).map(PhotoResponse::from);
+    }
+
+    public PhotoFile getImage(UUID id) {
+        Photo photo = photoRepository.findById(id).orElseThrow(() -> new PhotoNotFoundException(id));
+
+        Resource resource = storageService.load(photo.getStorageKey());
+        return new PhotoFile(resource, photo.getContentType(), photo.getOriginalFilename());
     }
 
     private String validateAndGetExtension(MultipartFile file) {
