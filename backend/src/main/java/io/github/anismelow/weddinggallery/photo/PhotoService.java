@@ -83,16 +83,35 @@ public class PhotoService {
         }
     }
 
+private Photo findPhoto(UUID id) {
+    return photoRepository.findById(id)
+            .orElseThrow(() -> new PhotoNotFoundException(id));
+}
+
+
     public Page<PhotoResponse> list(Pageable pageable) {
         return photoRepository.findAll(pageable).map(PhotoResponse::from);
     }
 
     public PhotoFile getImage(UUID id) {
-        Photo photo = photoRepository.findById(id).orElseThrow(() -> new PhotoNotFoundException(id));
+        Photo photo = findPhoto(id);
 
         Resource resource = storageService.load(photo.getStorageKey());
         return new PhotoFile(resource, photo.getContentType(), photo.getOriginalFilename());
     }
+   
+   
+    public PhotoFile getThumbnail(UUID id) {
+    Photo photo = findPhoto(id);
+
+    if (photo.getThumbnailKey() == null) {
+        // Sin miniatura (HEIC o fotos antiguas): servimos el original
+        return getImage(id);
+    }
+
+    Resource thumbnail = storageService.load(photo.getThumbnailKey());
+    return new PhotoFile(thumbnail, "image/jpeg", photo.getOriginalFilename());
+}
 
     private String validateAndGetExtension(MultipartFile file) {
 
