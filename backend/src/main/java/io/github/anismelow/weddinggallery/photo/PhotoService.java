@@ -2,6 +2,7 @@ package io.github.anismelow.weddinggallery.photo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -15,6 +16,7 @@ public class PhotoService {
 
     private final PhotoRepository photoRepository;
     private final StorageService storageService;
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "heic", "heif", "webp");
 
     public PhotoService(PhotoRepository photoRepository, StorageService storageService) {
         this.photoRepository = photoRepository;
@@ -22,8 +24,13 @@ public class PhotoService {
     }
 
     public PhotoResponse upload(MultipartFile file, String uploaderName) {
-        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename()).toLowerCase();
 
+        String extension = validateAndGetExtension(file);
+        String name = normalizeUploaderName(uploaderName);             
+
+        if (name != null && name.length() > 50) {
+            throw new InvalidPhotoException("El nombre no puede tener más de 50 caracteres");
+        }
         String storageKey;
         try (InputStream content = file.getInputStream()) {
             storageKey = storageService.store(content, extension);
@@ -36,9 +43,48 @@ public class PhotoService {
         photo.setStorageKey(storageKey);
         photo.setContentType(file.getContentType());
         photo.setSizeBytes(file.getSize());
-        photo.setUploaderName(uploaderName);
+        photo.setUploaderName(name);
 
         Photo saved = photoRepository.save(photo);
         return PhotoResponse.from(saved);
     }
+
+    private String validateAndGetExtension(MultipartFile file) {
+    
+        if (file == null || file.isEmpty()) {
+            throw new InvalidPhotoException("No se ha enviado ninguna foto o está vacía");
+        }
+
+        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        if (extension == null) {
+            throw new InvalidPhotoException("El fichero no tiene extensión");
+        }
+
+        extension = extension.toLowerCase();
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new InvalidPhotoException("Formato no permitido: " + extension);
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new InvalidPhotoException("El fichero no es una imagen");
+        }
+
+        return extension;
+    }
+
+    private String normalizeUploaderName(String uploaderName) {
+    if (!StringUtils.hasText(uploaderName)) {
+        return null;
+    }
+    return uploaderName.trim();
+}
+
+
+
+
+
+
+
+
 }
