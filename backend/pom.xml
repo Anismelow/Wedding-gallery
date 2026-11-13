@@ -87,7 +87,21 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Generación de miniaturas -->
+<dependency>
+    <groupId>net.coobird</groupId>
+    <artifactId>thumbnailator</artifactId>
+    <version>0.4.21</version>
+</dependency>
+
+<!-- Plugin de ImageIO para leer WebP -->
+<dependency>
+    <groupId>com.twelvemonkeys.imageio</groupId>
+    <artifactId>imageio-webp</artifactId>
+    <version>3.15.2</version>
+</dependency>
 	</dependencies>
+	
 
 	<build>
 		<plugins>
