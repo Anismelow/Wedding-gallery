@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;        
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,6 +50,12 @@ public class PhotoService {
         Photo saved = photoRepository.save(photo);
         return PhotoResponse.from(saved);
     }
+
+
+    public Page<PhotoResponse> list(Pageable pageable) {
+    return photoRepository.findAll(pageable).map(PhotoResponse::from);
+}
+
 
     private String validateAndGetExtension(MultipartFile file) {
     
