@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import io.github.anismelow.weddinggallery.access.UnauthorizedException;
 import io.github.anismelow.weddinggallery.photo.InvalidPhotoException;
 import io.github.anismelow.weddinggallery.photo.PhotoNotFoundException;
 import io.github.anismelow.weddinggallery.storage.StorageException;
@@ -36,7 +37,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PhotoNotFoundException.class)
-public ProblemDetail handlePhotoNotFound(PhotoNotFoundException ex) {
-    return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
-}
+    public ProblemDetail handlePhotoNotFound(PhotoNotFoundException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ProblemDetail handleUnauthorized(UnauthorizedException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
 }
