@@ -1,5 +1,6 @@
 package io.github.anismelow.weddinggallery.photo;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.CacheControl;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +57,21 @@ public class PhotoController {
     public ResponseEntity<Resource> thumbnail(@PathVariable UUID id) {
         return toImageResponse(photoService.getThumbnail(id));
     }
+
+    @GetMapping("/{id}/download")
+public ResponseEntity<Resource> download(@PathVariable UUID id) {
+    PhotoFile file = photoService.getImage(id);
+
+    ContentDisposition disposition = ContentDisposition.attachment()
+            .filename(file.originalFilename(), StandardCharsets.UTF_8)
+            .build();
+
+    return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(file.contentType()))
+            .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+            .header("X-Content-Type-Options", "nosniff")
+            .body(file.resource());
+}
 
     private ResponseEntity<Resource> toImageResponse(PhotoFile file) {
         return ResponseEntity.ok()
