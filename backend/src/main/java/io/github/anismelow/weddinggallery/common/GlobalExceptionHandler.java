@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import io.github.anismelow.weddinggallery.access.UnauthorizedException;
 import io.github.anismelow.weddinggallery.photo.InvalidPhotoException;
+import io.github.anismelow.weddinggallery.photo.NotPhotoOwnerException;
 import io.github.anismelow.weddinggallery.photo.PhotoNotFoundException;
 import io.github.anismelow.weddinggallery.storage.StorageException;
 
@@ -44,6 +45,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ProblemDetail handleUnauthorized(UnauthorizedException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(NotPhotoOwnerException.class)
+    public ProblemDetail handleNotPhotoOwner(NotPhotoOwnerException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
 }

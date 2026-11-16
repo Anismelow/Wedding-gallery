@@ -44,7 +44,7 @@ public class PhotoService {
         this.thumbnailGenerator = thumbnailGenerator;
     }
 
-    public PhotoResponse upload(MultipartFile file, String uploaderName) {
+    public PhotoResponse upload(MultipartFile file, String uploaderName, UUID ownerId) {
 
         String extension = validateAndGetExtension(file);
         String name = normalizeUploaderName(uploaderName);
@@ -67,9 +67,9 @@ public class PhotoService {
         photo.setSizeBytes(file.getSize());
         photo.setUploaderName(name);
         photo.setThumbnailKey(thumbnailKey);
+        photo.setOwnerId(ownerId);
 
-        Photo saved = photoRepository.save(photo);
-        return PhotoResponse.from(saved);
+        return PhotoResponse.from(photoRepository.save(photo), ownerId);
     }
 
     private String createThumbnail(String storageKey) {
@@ -83,14 +83,13 @@ public class PhotoService {
         }
     }
 
-private Photo findPhoto(UUID id) {
-    return photoRepository.findById(id)
-            .orElseThrow(() -> new PhotoNotFoundException(id));
-}
+    private Photo findPhoto(UUID id) {
+        return photoRepository.findById(id)
+                .orElseThrow(() -> new PhotoNotFoundException(id));
+    }
 
-
-    public Page<PhotoResponse> list(Pageable pageable) {
-        return photoRepository.findAll(pageable).map(PhotoResponse::from);
+    public Page<PhotoResponse> list(Pageable pageable, UUID viewerId) {
+        return photoRepository.findAll(pageable).map(photo -> PhotoResponse.from(photo, viewerId));
     }
 
     public PhotoFile getImage(UUID id) {
@@ -99,19 +98,33 @@ private Photo findPhoto(UUID id) {
         Resource resource = storageService.load(photo.getStorageKey());
         return new PhotoFile(resource, photo.getContentType(), photo.getOriginalFilename());
     }
-   
-   
-    public PhotoFile getThumbnail(UUID id) {
-    Photo photo = findPhoto(id);
 
-    if (photo.getThumbnailKey() == null) {
-        // Sin miniatura (HEIC o fotos antiguas): servimos el original
-        return getImage(id);
+    public PhotoFile getThumbnail(UUID id) {
+        Photo photo = findPhoto(id);
+
+        if (photo.getThumbnailKey() == null) {
+            // Sin miniatura (HEIC o fotos antiguas): servimos el original
+            return getImage(id);
+        }
+
+        Resource thumbnail = storageService.load(photo.getThumbnailKey());
+        return new PhotoFile(thumbnail, "image/jpeg", photo.getOriginalFilename());
     }
 
-    Resource thumbnail = storageService.load(photo.getThumbnailKey());
-    return new PhotoFile(thumbnail, "image/jpeg", photo.getOriginalFilename());
-}
+    public void delete(UUID id, UUID requesterId) {
+        Photo photo = findPhoto(id);
+
+        if (requesterId == null || !requesterId.equals(photo.getOwnerId())) {
+            throw new NotPhotoOwnerException("Solo puedes borrar las fotos que has subido tú");
+        }
+
+        // Primero la fila, después los ficheros (ver explicación).
+        photoRepository.delete(photo);
+        storageService.delete(photo.getStorageKey());
+        if (photo.getThumbnailKey() != null) {
+            storageService.delete(photo.getThumbnailKey());
+        }
+    }
 
     private String validateAndGetExtension(MultipartFile file) {
 

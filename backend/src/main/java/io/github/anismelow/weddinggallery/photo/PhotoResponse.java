@@ -9,21 +9,20 @@ public record PhotoResponse(
         String contentType,
         Long sizeBytes,
         String uploaderName,
-        Instant uploadedAt){
+        Instant uploadedAt,
+        boolean mine) {
 
-            public static PhotoResponse from(Photo photo) {
+    public static PhotoResponse from(Photo photo, UUID viewerId) {
+       
+        boolean mine = viewerId != null && viewerId.equals(photo.getOwnerId());
+
         return new PhotoResponse(
                 photo.getId(),
                 photo.getOriginalFilename(),
                 photo.getContentType(),
                 photo.getSizeBytes(),
                 photo.getUploaderName(),
-                photo.getUploadedAt()
-           
-        );
+                photo.getUploadedAt(),
+                mine);
     }
-
 }
-
-
-

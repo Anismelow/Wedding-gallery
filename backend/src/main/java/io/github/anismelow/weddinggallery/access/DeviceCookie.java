@@ -23,4 +23,16 @@ public final class DeviceCookie {
 
     }
 
+        /** Convierte el valor de la cookie en UUID; null si falta o no es válido. */
+    public static UUID parse(String value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            return UUID.fromString(value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
 }
