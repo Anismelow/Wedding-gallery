@@ -8,6 +8,8 @@ export type Photo = {
   sizeBytes: number;
   uploaderName: string | null;
   uploadedAt: string;
+  /** true si la subió este móvil: solo entonces se puede borrar. */
+  mine: boolean;
 };
 
 /** Igual que el PagedModel que devuelve GET /api/photos. */
@@ -86,6 +88,11 @@ export async function fetchPhotos(page: number): Promise<PhotoPage> {
     `/api/photos?page=${page}&size=${PAGE_SIZE}`,
   );
   return (await response.json()) as PhotoPage;
+}
+
+/** Borra una foto. El servidor solo lo permite si la subió este móvil. */
+export async function deletePhoto(id: string): Promise<void> {
+  await request(`/api/photos/${id}`, { method: "DELETE" });
 }
 
 /**
