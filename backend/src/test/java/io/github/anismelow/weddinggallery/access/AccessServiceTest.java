@@ -48,6 +48,15 @@ class AccessServiceTest {
                 .hasMessageContaining("16");
     }
 
+      @Test
+    void isValid_devuelveFalseConUnCodigoIncorrecto() {
+        // Act
+        boolean result = accessService.isValid("otro-codigo-cualquiera");
+
+        // Assert
+        assertThat(result).isFalse();
+    }
+
     
 
 }
