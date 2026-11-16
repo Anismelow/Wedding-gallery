@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Paleta mínima: papel, tinta verde muy oscura y hojas de olivo.
+   El único color vivo es la baya, y solo se usa para avisar de errores. */
+@theme {
+  --color-paper: #f8f9f6;
+  --color-print: #ffffff;
+  --color-ink: #1f2b23;
+  --color-olive: #5c6b59;
+  --color-leaf: #9aa893;
+  --color-line: #dfe4da;
+  --color-berry: #a8323a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Caligrafía solo para los nombres y los títulos; lo demás, Jost. */
+  --font-script: "Pinyon Script", cursive;
+  --font-sans: "Jost Variable", system-ui, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Sombra de una foto de papel apoyada en la mesa. */
+  --shadow-print: 0 1px 2px rgb(31 43 35 / 0.1), 0 10px 22px -10px rgb(31 43 35 / 0.35);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Foco visible para quien navega con teclado. */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+.on-dark :focus-visible {
+  outline-color: var(--color-paper);
+}
+
+dialog::backdrop {
+  background: var(--color-ink);
 }
