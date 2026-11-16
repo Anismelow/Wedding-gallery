@@ -73,11 +73,12 @@ public ResponseEntity<Resource> download(@PathVariable UUID id) {
             .body(file.resource());
 }
 
-    private ResponseEntity<Resource> toImageResponse(PhotoFile file) {
+private ResponseEntity<Resource> toImageResponse(PhotoFile file) {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(file.contentType()))
-                .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePublic())
+                .cacheControl(CacheControl.maxAge(Duration.ofDays(365)).cachePrivate())
                 .header("X-Content-Type-Options", "nosniff")
                 .body(file.resource());
     }
+    
 }
