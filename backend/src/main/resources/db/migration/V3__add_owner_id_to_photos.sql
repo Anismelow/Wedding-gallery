@@ -1,0 +1,1 @@
+ALTER TABLE photos ADD COLUMN owner_id UUID;
