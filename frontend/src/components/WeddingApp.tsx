@@ -222,6 +222,19 @@ export function WeddingApp() {
           photos={album.photos}
           index={openIndex}
           onNavigate={setOpenIndex}
+          onDeleted={(id) => {
+            // Se quita de la lista y se enseña la siguiente (o se cierra
+            // si era la última).
+            const remaining = album.photos.length - 1;
+            setAlbum((current) => ({
+              ...current,
+              photos: current.photos.filter((photo) => photo.id !== id),
+              total: Math.max(0, current.total - 1),
+            }));
+            setOpenIndex(
+              remaining === 0 ? null : Math.min(openIndex, remaining - 1),
+            );
+          }}
           onClose={() => setOpenIndex(null)}
         />
       )}

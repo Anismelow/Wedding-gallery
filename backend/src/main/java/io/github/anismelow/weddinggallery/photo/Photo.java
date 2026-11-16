@@ -47,4 +47,7 @@ public class Photo {
 
     @Column(name = "thumbnail_key", length = 255, unique = true)
     private String thumbnailKey;
+
+        @Column(name = "owner_id")
+    private UUID ownerId;
 }

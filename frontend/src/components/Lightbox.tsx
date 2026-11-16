@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { downloadUrl, imageUrl, type Photo } from "@/lib/api";
+import {
+  ApiError,
+  deletePhoto,
+  downloadUrl,
+  imageUrl,
+  type Photo,
+} from "@/lib/api";
 
 const dateFormat = new Intl.DateTimeFormat("es-ES", {
   day: "numeric",
@@ -79,17 +85,47 @@ export function Lightbox({
   photos,
   index,
   onNavigate,
+  onDeleted,
   onClose,
 }: {
   photos: Photo[];
   index: number;
   onNavigate: (index: number) => void;
+  onDeleted: (id: string) => void;
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   // Dónde empezó el dedo, para saber si ha deslizado a un lado.
   const touchStartX = useRef<number | null>(null);
   const photo = photos[index];
+  // Borrar pide confirmación. Se guarda el id (y no un simple true/false)
+  // para que la pregunta desaparezca sola al pasar a otra foto.
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const confirming = confirmingId === photo.id;
+
+  async function remove() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deletePhoto(photo.id);
+      onDeleted(photo.id);
+      setConfirmingId(null);
+    } catch (error) {
+      // 404 = ya estaba borrada: para el invitado es lo mismo que borrarla.
+      if (error instanceof ApiError && error.status === 404) {
+        onDeleted(photo.id);
+        setConfirmingId(null);
+      } else {
+        setDeleteError(
+          error instanceof ApiError ? error.message : "No se pudo borrar la foto.",
+        );
+      }
+    } finally {
+      setDeleting(false);
+    }
+  }
   const hasPrevious = index > 0;
   const hasNext = index < photos.length - 1;
 
@@ -128,13 +164,27 @@ export function Lightbox({
               {dateFormat.format(new Date(photo.uploadedAt))}
             </span>
           </p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="h-11 shrink-0 rounded-full px-4 underline underline-offset-4"
-          >
-            Cerrar
-          </button>
+          <div className="flex shrink-0 items-center">
+            {photo.mine && !confirming && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteError(null);
+                  setConfirmingId(photo.id);
+                }}
+                className="h-11 rounded-full px-3 underline underline-offset-4"
+              >
+                Borrar
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-11 rounded-full px-3 underline underline-offset-4"
+            >
+              Cerrar
+            </button>
+          </div>
         </div>
 
         <div
@@ -174,15 +224,41 @@ export function Lightbox({
           </button>
         </div>
 
-        <div className="mx-auto flex w-full max-w-md gap-2 px-4 pb-6 pt-3">
-          {canShareFiles() && <ShareButton key={photo.id} photo={photo} />}
-          <a
-            href={downloadUrl(photo.id)}
-            className="flex h-14 flex-[2] items-center justify-center rounded-full bg-paper text-lg font-medium text-ink"
-          >
-            Descargar original
-          </a>
-        </div>
+        {confirming ? (
+          <div className="mx-auto w-full max-w-md px-4 pb-6 pt-3 text-center">
+            <p role="alert" className="text-lg">
+              {deleteError ?? "¿Borrar esta foto? No se puede deshacer."}
+            </p>
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmingId(null)}
+                disabled={deleting}
+                className="h-14 flex-1 rounded-full border border-paper text-lg disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => void remove()}
+                disabled={deleting}
+                className="h-14 flex-1 rounded-full bg-berry text-lg font-medium text-white disabled:opacity-60"
+              >
+                {deleting ? "Borrando…" : "Borrar foto"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto flex w-full max-w-md gap-2 px-4 pb-6 pt-3">
+            {canShareFiles() && <ShareButton key={photo.id} photo={photo} />}
+            <a
+              href={downloadUrl(photo.id)}
+              className="flex h-14 flex-[2] items-center justify-center rounded-full bg-paper text-lg font-medium text-ink"
+            >
+              Descargar original
+            </a>
+          </div>
+        )}
       </div>
     </dialog>
   );
