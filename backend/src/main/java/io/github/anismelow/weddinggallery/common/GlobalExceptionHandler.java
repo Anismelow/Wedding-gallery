@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleStorage(StorageException ex) {
         log.error("Error de almacenamiento", ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
-                "No se pudo guardar la foto. Inténtalo de nuevo.");
+                "Ha ocurrido un error con el almacenamiento de las fotos. Inténtalo de nuevo.");
     }
 
     @ExceptionHandler(PhotoNotFoundException.class)
