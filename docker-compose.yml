@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17
+    container_name: wedding-gallery-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - wedding:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      timeout: 5s
+      retries: 5
+      interval: 5s
+    restart: unless-stopped
+volumes:
+  wedding:
+
